@@ -85,34 +85,37 @@ void UpdatePlayer(Player *player, EnvItem *envItems, int envItemsLength, float d
     if(IsKeyDown(KEY_RIGHT)) player->position.x += PLAYER_HOR_SPEED*delta;
 
     if(IsKeyDown(KEY_SPACE) && player->canJump) {
-        player->speed = -PLAYER_JUMP_SPEED;
+        player->speed = -PLAYER_JUMP_SPEED; // makes negative since y axis is reverse on screens
         player->canJump = false;
     }
 
     Vector2 p = player->position;
 
     bool hitObstacle = false;
-    for(int i = 0; i < envItemsLength; i++) {
-        EnvItem *e = envItems + i;
 
-        if(e->blocking &&
-            e->rect.x <= p.x &&
-            e->rect.x + e->rect.width >= p.x &&
-            e->rect.y >= p.y &&
-            e->rect.y <= p.y + player->speed*delta
+    // checks if hitting any obstables
+    for(int i = 0; i < envItemsLength; i++) {
+        EnvItem *envItemPtr = envItems + i;
+
+        if(envItemPtr->blocking && // is this env item blocking?
+            envItemPtr->rect.x <= p.x && // is the players x position to the right of the left edge of the env item?
+            envItemPtr->rect.x + e->rect.width >= p.x && // is the players x position to the left of the right edge of the env item?
+            envItemPtr->rect.y >= p.y && // is the players y position above the top edge of the env item?
+            envItemPtr->rect.y <= p.y + player->speed*delta // is the players y position below the bottom edge of the env item (after applying speed and delta to it)?
         )
+        // if true
         {
             hitObstacle = true;
-            player->speed = 0.0f;
-            p.y = e->rect.y;
+            player->speed = 0.0f; // stop the players speed
+            p.y = e->rect.y; // set the players y position to the top of the env item (so they dont fall through)
 
-            break;
+            break; // break out of the loop since we only need to check for one collision
         }
     }
 
     if (!hitObstacle) {
-        player->position.y += player->speed*delta;
-        player->speed += G*delta;
+        player->position.y += player->speed*delta; // apply speed and delta to the players y position
+        player->speed += G*delta; // apply gravity to the players speed (makes it fall down)
         player->canJump = false;
     }
     else {player->canJump = true;}
