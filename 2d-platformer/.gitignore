@@ -37,3 +37,5 @@ ipch/
 
 # Raylib game assets build outputs (optional generic)
 *.out
+
+*.slnx
